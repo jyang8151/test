@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Study LIB
+  </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      background-image: url("paper.gif");
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .dictionary {
+      background-color: #f7f7f7;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .term {
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .definition {
+      margin-top: 10px;
+      color: #666;
+    }
+
+    .form-container {
+      margin-bottom: 20px;
+    }
+
+    .form-container input[type="text"] {
+      width: 200px;
+      padding: 5px;
+      margin-right: 10px;
+    }
+
+    .form-container button {
+      padding: 5px 10px;
+      background-color: #4CAF50;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .form-container button:hover {
+      background-color: #45a049;
+    }
+
+    .remove-btn {
+      background-color: #f44336;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      padding: 2px 5px;
+      font-weight: bold;
+      font-size: 10px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .remove-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    .section-header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .section-header::first-letter {
+      text-transform: capitalize;
+    }
+
+    .remove-section-btn {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+    }
+  </style>
+</head>
+<body>
+  <h1>Study LIB</h1>
+
+  <div class="form-container">
+    <input type="text" id="sectionInput" placeholder="Enter Category">
+    <input type="text" id="termInput" placeholder="Enter term">
+    <input type="text" id="definitionInput" placeholder="Enter definition">
+    <button onclick="addTerm()">Add Term</button>
+  </div>
+
+  <div id="dictionaryContainer"></div>
+
+  <script>
+    var dictionary = {};
+
+    function addTerm() {
+      var sectionInput = document.getElementById("sectionInput");
+      var termInput = document.getElementById("termInput");
+      var definitionInput = document.getElementById("definitionInput");
+
+      var section = sectionInput.value.trim();
+      var term = termInput.value.trim();
+      var definition = definitionInput.value.trim();
+
+      if (section !== "" && term !== "" && definition !== "") {
+        if (!dictionary.hasOwnProperty(section)) {
+          dictionary[section] = [];
+        }
+
+        var termObj = {
+          term: term,
+          definition: definition,
+          visible: true // Added visible property for each term
+        };
+
+        dictionary[section].push(termObj);
+
+        displayDictionary();
+
+        sectionInput.value = "";
+        termInput.value = "";
+        definitionInput.value = "";
+      }
+    }
+
+    function removeTerm(section, index) {
+      dictionary[section].splice(index, 1);
+      displayDictionary();
+    }
+
+    function removeCategory(section) {
+      delete dictionary[section];
+      displayDictionary();
+    }
+
+    function toggleDefinition(section, index) {
+      dictionary[section][index].visible = !dictionary[section][index].visible;
+      displayDictionary();
+    }
+
+    function displayDictionary() {
+      var dictionaryContainer = document.getElementById("dictionaryContainer");
+      dictionaryContainer.innerHTML = "";
+
+      for (var section in dictionary) {
+        if (dictionary.hasOwnProperty(section)) {
+          var sectionDiv = document.createElement("div");
+          sectionDiv.className = "dictionary";
+
+          var sectionHeader = document.createElement("h2");
+          sectionHeader.className = "section-header";
+          sectionHeader.textContent = section;
+
+          var removeSectionBtn = document.createElement("button");
+          removeSectionBtn.className = "remove-section-btn";
+          removeSectionBtn.textContent = "X";
+          removeSectionBtn.onclick = (function (s) {
+            return function () {
+              removeCategory(s);
+            };
+          })(section);
+
+          sectionHeader.appendChild(removeSectionBtn);
+          sectionDiv.appendChild(sectionHeader);
+
+          for (var i = 0; i < dictionary[section].length; i++) {
+            var termObj = dictionary[section][i];
+
+            var termDiv = document.createElement("div");
+            termDiv.className = "term";
+            termDiv.textContent = termObj.term;
+
+            // Toggle visibility of definition
+            termDiv.onclick = (function (s, idx) {
+              return function () {
+                toggleDefinition(s, idx);
+              };
+            })(section, i);
+
+            if (termObj.visible) {
+              var definitionDiv = document.createElement("div");
+              definitionDiv.className = "definition";
+              definitionDiv.textContent = termObj.definition;
+              termDiv.appendChild(definitionDiv);
+            }
+
+            var removeBtn = document.createElement("button");
+            removeBtn.className = "remove-btn";
+            removeBtn.textContent = "Remove";
+            removeBtn.onclick = (function (s, idx) {
+              return function () {
+                removeTerm(s, idx);
+              };
+            })(section, i);
+
+            termDiv.appendChild(removeBtn);
+            sectionDiv.appendChild(termDiv);
+          }
+
+          dictionaryContainer.appendChild(sectionDiv);
+        }
+      }
+    }
+  </script>
+  <footer style="text-align: center; margin-top: 20px; color: #888;">
+    Created by Jackson Yang &copy; 05/22/2023
+  </footer>
+</body>
+</html>
